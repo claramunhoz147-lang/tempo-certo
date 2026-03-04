@@ -7,6 +7,12 @@ const errorMessage = document.getElementById("errorMessage");
 const forecastContainer = document.getElementById("forecastContainer");
 const loader = document.getElementById("loader");
 
+// ELEMENTOS DO CLIMA ATUAL (verifique se existem no HTML)
+const cityName = document.getElementById("cityName");
+const temperature = document.getElementById("temperature");
+const humidity = document.getElementById("humidity");
+const wind = document.getElementById("wind");
+
 // Função principal
 async function handleSearch() {
   const city = cityInput.value.trim();
@@ -20,6 +26,7 @@ async function handleSearch() {
   hideError();
 
   try {
+    await getCurrentWeather(city);
     await getForecast(city);
   } catch (error) {
     showError("Erro ao buscar dados. Verifique o nome da cidade.");
@@ -28,7 +35,25 @@ async function handleSearch() {
   }
 }
 
-// Previsão 5 dias
+// 🔥 Clima atual
+async function getCurrentWeather(city) {
+  const response = await fetch(
+    `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}&lang=pt_br`
+  );
+
+  if (!response.ok) {
+    throw new Error("Erro no clima atual");
+  }
+
+  const data = await response.json();
+
+  cityName.textContent = data.name;
+  temperature.textContent = Math.round(data.main.temp) + "°C";
+  humidity.textContent = data.main.humidity + "%";
+  wind.textContent = data.wind.speed + " km/h";
+}
+
+// 🔥 Previsão 5 dias
 async function getForecast(city) {
   const response = await fetch(
     `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${apiKey}&lang=pt_br`
